@@ -128,6 +128,10 @@ module Fastlane
 
           Actions.add_modified_files [plist_path] if Actions.respond_to? :add_modified_files
         end
+        
+        def ignore_cocoapods_path(all_xcodeproj_paths)
+          all_xcodeproj_paths.reject { |path| %r{/Pods/.*.xcodeproj} =~ path }
+        end
 
         def xcodeproj_path_from_params(params)
           return params[:xcodeproj] if params[:xcodeproj]
@@ -140,7 +144,7 @@ module Fastlane
 
           all_xcodeproj_paths = Dir[File.expand_path(File.join(repo_path, '**/*.xcodeproj'))]
           # find an xcodeproj (ignoring dependencies)
-          xcodeproj_paths = Fastlane::Helper::XcodeprojHelper.find(all_xcodeproj_paths)
+          xcodeproj_paths = ignore_cocoapods_path(all_xcodeproj_paths)
 
           # no projects found: error
           UI.user_error!('Could not find a .xcodeproj in the current repository\'s working directory.') and return nil if xcodeproj_paths.count == 0
